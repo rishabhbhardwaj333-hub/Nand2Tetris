@@ -1,92 +1,67 @@
-// Roll number: 2501730015; K=15
-// Box: starts at row 15, height 20 rows, width 64 pixels (4 words).
+// Roll number: 2501730355; K=55
+// Box: starts at row 55, height 20 rows, width 64 pixels (4 words).
 // While any key is pressed, paint black; otherwise clear the same area.
+// Start address = SCREEN + 55*32 = SCREEN + 1760
 
 (LOOP)
     @KBD
     D=M
-    @DRAW
+    @BLACK
     D;JGT
 
-// Clear the box: 20 rows x 4 words.
-    @SCREEN
-    D=A
-    @480
-    D=D+A
-    @PTR
-    M=D
-    @20
-    D=A
-    @ROWS
-    M=D
-(CLEAR_ROW)
-    @4
-    D=A
-    @COLS
-    M=D
-(CLEAR_COL)
-    @PTR
-    A=M
+    // No key pressed -> white
+    @COLOR
     M=0
-    @PTR
-    M=M+1
-    @COLS
-    MD=M-1
-    @CLEAR_COL
-    D;JGT
-    @32
-    D=A
-    @PTR
-    M=D+M
-    @4
-    D=A
-    @PTR
-    M=M-D
-    @ROWS
-    MD=M-1
-    @CLEAR_ROW
-    D;JGT
-    @LOOP
+    @PAINT
     0;JMP
 
-(DRAW)
-// Draw the box: 20 rows x 4 words, each word = 16 black pixels.
+(BLACK)
+    @COLOR
+    M=-1
+
+(PAINT)
     @SCREEN
     D=A
-    @480
+    @1760
     D=D+A
     @PTR
-    M=D
+    M=D            // PTR = address of row 55, word 0
+
     @20
     D=A
     @ROWS
-    M=D
-(DRAW_ROW)
+    M=D            // 20 rows
+
+(ROW)
     @4
     D=A
     @COLS
-    M=D
-(DRAW_COL)
+    M=D            // 4 words per row
+
+(COL)
+    @COLOR
+    D=M
     @PTR
     A=M
-    M=-1
+    M=D            // RAM[PTR] = COLOR
+
     @PTR
-    M=M+1
+    M=M+1          // next word
+
     @COLS
     MD=M-1
-    @DRAW_COL
-    D;JGT
-    @32
+    @COL
+    D;JGT          // repeat for 4 words
+
+    @28            // PTR is at start+4; need start+32
     D=A
     @PTR
     M=D+M
-    @4
-    D=A
-    @PTR
-    M=M-D
+
     @ROWS
     MD=M-1
-    @DRAW_ROW
-    D;JGT
+    @ROW
+    D;JGT          // repeat for 20 rows
+
     @LOOP
     0;JMP
